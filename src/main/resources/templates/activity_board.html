@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('活动申请看板')}"></head>
+<body class="cf-app" data-page="activity_board">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('activity')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('活动申请看板')}"></header>
+<main id="main" tabindex="-1">
+<div class="page-heading"><div><h1>活动申请看板</h1><p>按审批状态浏览申请，随时了解流程进展。</p></div><div class="heading-actions"><a class="button secondary" th:href="@{/activity/list}"><svg th:replace="~{fragments/layout :: icon('file')}"></svg>返回列表</a><a class="button primary" th:if="${canSubmitActivity}" th:href="@{/activity/add}">＋ 新增申请</a></div></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+<div class="kanban-scroll" tabindex="0" role="region" aria-label="活动申请看板，可横向滚动"><div class="kanban"><section class="kanban-column" th:each="group,st : ${ {pending,inProgress,approved,rejected} }" th:classappend="${st.index == 0 ? 'pending' : st.index == 1 ? 'processing' : st.index == 2 ? 'success' : 'danger'}"><div class="kanban-heading"><h2><i></i><span th:text="${ {'待审批','审批中','已获批','已驳回'}[st.index] }"></span></h2><span th:text="${#lists.size(group)}"></span></div><a class="board-card" th:each="a : ${group}" th:href="@{/activity/detail/{id}(id=${a.id})}"><span class="board-club" th:text="${clubNames[a.clubId]} ?: '—'"></span><h3 th:text="${a.title}"></h3><span class="cell-sub"><span th:text="|#CF-${a.id}|"></span><span th:if="${userNames[a.applyUser] != null}" th:text="${' · ' + userNames[a.applyUser]}"></span></span><div class="board-card-bottom"><strong th:text="${'¥' + #numbers.formatDecimal(a.totalApply,1,'COMMA',2,'POINT')}"></strong><span th:text="${#temporals.format(a.startTime,'MM月dd日')}"></span></div><div class="board-stage"><span th:replace="~{fragments/layout :: status(${a.status})}"></span><span class="archive-pill" th:if="${a.archived == 1}">已归档</span></div></a><div class="board-empty" th:if="${#lists.isEmpty(group)}">暂无申请</div></section></div></div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

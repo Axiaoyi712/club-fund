@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('社团表单')}"></head>
+<body class="cf-app" data-page="club_form">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('club')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('社团表单')}"></header>
+<main id="main" tabindex="-1">
+<div class="container-fluid px-0 mx-auto" style="max-width:640px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <!-- 有 club 说明是编辑，没有就是新增 -->
+            <h4 class="mb-3" th:text="${club != null and club.id != null ? '编辑社团' : '新增社团'}"></h4>
+
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <form th:action="@{${club != null and club.id != null} ? '/club/edit' : '/club/add'}" method="post">
+                <!-- 编辑时携带 id -->
+                <input type="hidden" name="id" th:value="${club != null ? club.id : ''}">
+
+                <div class="mb-3">
+                    <label class="form-label" for="club-name">社团名称（主办单位）<span class="text-danger">*</span></label>
+                    <input type="text" name="name" id="club-name" class="form-control" required maxlength="100"
+                           th:value="${club != null ? club.name : ''}"
+                           placeholder="如：人工智能学院团委学生会">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="club-description">社团简介</label>
+                    <textarea name="description" id="club-description" class="form-control" rows="3" maxlength="500"
+                              th:text="${club != null ? club.description : ''}"
+                              placeholder="一句话说明这个社团是干什么的"></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <a class="btn btn-outline-secondary" th:href="@{/club/list}">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    </div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

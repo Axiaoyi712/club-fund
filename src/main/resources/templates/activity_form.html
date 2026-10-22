@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${editingActivity != null ? '修改并重新提交' : '新增活动申请'})}"></head>
+<body class="cf-app" data-page="activity_form">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('activity')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar(${editingActivity != null ? '修改并重新提交' : '新增活动申请'})}"></header>
+<main id="main" tabindex="-1">
+<a class="back-link" th:href="${editingActivity != null} ? @{/activity/detail/{id}(id=${editingActivity.id})} : @{/activity/list}"><svg th:replace="~{fragments/layout :: icon('arrow')}"></svg>返回活动申请</a>
+<div class="page-heading"><div><h1 th:text="${editingActivity != null ? '修改并重新提交申请' : '活动经费申请表'}">活动经费申请表</h1><p th:text="${editingActivity != null ? '按审批意见修改，校验通过后从主席团重新开始审批。' : '填写基本信息与预算明细，核对后提交审批。'}"></p></div></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+<div class="reject-note mb-3" th:if="${editingActivity != null}"><strong>上次驳回意见：</strong><span class="approval-text" th:text="${editingActivity.rejectReason} ?: '请查看历次审批记录。'"></span><p>修改与重新提交将一次完成，原申请编号和历次审批记录保留。</p></div>
+<form th:action="${editingActivity != null} ? @{/activity/edit/{id}(id=${editingActivity.id})} : @{/activity/add}" method="post" id="activity-form" th:object="${form}">
+    <input th:if="${editingActivity == null}" type="hidden" th:field="*{submissionToken}">
+    <section class="panel mb-3"><div class="panel-heading"><h2><span class="section-number">01</span>基本信息</h2><span class="subtle-label">带 * 为必填项</span></div><div class="form-section row g-3">
+        <div class="col-md-6"><label class="form-label" for="clubId">主办社团 <span class="text-danger">*</span></label><select name="clubId" id="clubId" class="form-select" required aria-describedby="club-help"><option value="">请选择社团</option><option th:each="c : ${clubs}" th:value="${c.id}" th:text="${c.name}" th:selected="${form != null and form.clubId == c.id}"></option></select><div class="form-text" id="club-help" th:text="${editingActivity != null ? '重新提交沿用原主办社团与申请人。' : '仅可为本人负责的社团提交申请。'}"></div></div>
+        <div class="col-md-6"><label class="form-label" for="organizer">承办 / 协办单位</label><input type="text" name="organizer" id="organizer" class="form-control" th:field="*{organizer}" maxlength="100" placeholder="填写承办或协办单位"></div>
+        <div class="col-12"><label class="form-label" for="title">活动名称 <span class="text-danger">*</span></label><input type="text" name="title" id="title" class="form-control" th:field="*{title}" maxlength="200" required placeholder="请填写活动官方全称"></div>
+        <div class="col-md-4"><label class="form-label" for="location">活动地点</label><input type="text" name="location" id="location" class="form-control" th:field="*{location}" maxlength="100" placeholder="如：创新实践中心 A201"></div>
+        <div class="col-md-4"><label class="form-label" for="startTime">活动开始时间 <span class="text-danger">*</span></label><input type="datetime-local" name="startTime" id="startTime" class="form-control" required th:field="*{startTime}" aria-describedby="time-help"><div class="form-text" id="time-help">按学院要求，须至少提前一周申请。</div></div>
+        <div class="col-md-4"><label class="form-label" for="endTime">活动结束时间 <span class="text-danger">*</span></label><input type="datetime-local" name="endTime" id="endTime" class="form-control" required th:field="*{endTime}" aria-describedby="end-time-help"><div class="form-text" id="end-time-help">请填写计划结束时间，活动结束后方可归档。</div></div>
+    </div></section>
+    <section class="panel mb-3"><div class="list-toolbar"><h2><span class="section-number">02</span>经费预算明细</h2><button type="button" class="button secondary" id="add-item">＋ 添加明细</button></div><p class="form-help">预算金额按数量与单价计算，每项申请金额不得超过该项预算。数量须为正整数，单价和申请金额允许为0，金额最多两位小数。</p><div class="table-responsive" tabindex="0" role="region" aria-label="预算明细表，可横向滚动"><table class="table budget-form-table mb-0 align-middle"><thead><tr><th scope="col">序号</th><th scope="col">开支项目</th><th scope="col">数量</th><th scope="col">单价（元）</th><th scope="col" class="text-end">预算金额</th><th scope="col">申请金额（元）</th><th scope="col">操作</th></tr></thead><tbody id="itemTbody"><tr th:each="it,st : ${form.items}"><td class="seq" th:text="${st.count}"></td><td><input class="form-control form-control-sm item-name" th:name="|items[${st.index}].itemName|" th:field="*{items[__${st.index}__].itemName}" maxlength="100" required aria-label="开支项目" placeholder="如：活动物资"></td><td><input type="number" min="1" class="form-control form-control-sm qty" th:name="|items[${st.index}].quantity|" th:value="${bindingResult != null ? bindingResult.getFieldValue('items[' + st.index + '].quantity') : it.quantity}" step="1" max="2147483647" required aria-label="数量"></td><td><input type="number" min="0" step="0.01" class="form-control form-control-sm price" th:name="|items[${st.index}].unitPrice|" th:value="${bindingResult != null ? bindingResult.getFieldValue('items[' + st.index + '].unitPrice') : it.unitPrice}" max="99999999.99" required aria-label="单价"></td><td class="budget text-end">¥0.00</td><td><input type="number" min="0" step="0.01" class="form-control form-control-sm apply" th:name="|items[${st.index}].applyAmount|" th:value="${bindingResult != null ? bindingResult.getFieldValue('items[' + st.index + '].applyAmount') : it.applyAmount}" max="99999999.99" aria-label="申请金额"><div class="field-error apply-error" aria-live="polite" hidden></div></td><td><button type="button" class="btn btn-outline-danger btn-sm remove-item">删除</button></td></tr></tbody><tfoot><tr><th colspan="4" scope="row" class="text-end">合计</th><td id="totalBudget" class="text-end amount">¥0.00</td><td id="totalApply" class="amount">¥0.00</td><td></td></tr></tfoot></table></div></section>
+    <div class="form-submit-bar"><div><strong th:text="${editingActivity != null ? '重新提交前请核对修改内容与预算' : '提交前请核对活动信息与预算'}"></strong><p>审批顺序：主席团 → 团委老师 → 学院领导</p></div><div class="heading-actions"><a class="button secondary" th:href="${editingActivity != null} ? @{/activity/detail/{id}(id=${editingActivity.id})} : @{/activity/list}">取消</a><button type="submit" class="button primary"><span th:text="${editingActivity != null ? '保存修改并重新提交' : '提交申请'}"></span> <svg th:replace="~{fragments/layout :: icon('arrow')}"></svg></button></div></div>
+</form>
+<script th:src="@{/js/activity-form.js(v='83573774a733')}" defer></script>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

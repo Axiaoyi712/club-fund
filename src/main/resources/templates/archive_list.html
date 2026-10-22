@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('经费执行台账')}"></head>
+<body class="cf-app" data-page="archive_list">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('archive')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('经费执行台账')}"></header>
+<main id="main" tabindex="-1">
+<div class="page-heading"><div><h1>经费执行台账</h1><p>核对已归档活动的获批金额、实际支出与结余。</p></div><a class="button secondary" th:href="@{/activity/list}">查看活动申请 <svg th:replace="~{fragments/layout :: icon('arrow')}"></svg></a></div>
+<section class="metrics three" aria-label="归档经费统计"><article th:replace="~{fragments/layout :: metric('已归档活动', ${archivedCount}, ${archiveTrendText}, 'archive', false)}"></article><article th:replace="~{fragments/layout :: metric('获批经费合计', ${applySum}, '已归档活动的申请金额', 'coins', true)}"></article><article th:replace="~{fragments/layout :: metric('经费结余合计', ${balanceSum}, '获批金额减去实际支出', 'chart', true)}"></article></section>
+<section class="panel"><div class="list-toolbar"><h2>已归档活动</h2><span class="subtle-label">金额单位：元</span></div><div class="table-responsive" tabindex="0" role="region" aria-label="经费执行台账，可横向滚动"><table class="data-table ledger-table"><thead><tr><th scope="col">编号</th><th scope="col">活动内容</th><th scope="col">主办社团</th><th scope="col" class="number">获批金额</th><th scope="col" class="number">实际支出</th><th scope="col" class="number">结余 / 超支</th><th scope="col">归档人</th><th scope="col">归档时间</th><th scope="col">操作</th></tr></thead><tbody><tr th:each="row : ${rows}"><td class="muted-text" th:text="|#${row.activity.id}|"></td><td><a class="activity-name" th:href="@{/activity/detail/{id}(id=${row.activity.id})}" th:text="${row.activity.title}"></a></td><td th:text="${row.clubName}"></td><td class="number" th:text="${'¥' + #numbers.formatDecimal(row.activity.totalApply,1,'COMMA',2,'POINT')}"></td><td class="number" th:text="${'¥' + #numbers.formatDecimal(row.expenseTotal,1,'COMMA',2,'POINT')}"></td><td class="number"><span th:class="${row.balance >= 0 ? 'text-success' : 'text-danger'}" th:text="${(row.balance >= 0 ? '结余 ¥' : '超支 ¥') + #numbers.formatDecimal(row.balance.abs(),1,'COMMA',2,'POINT')}"></span></td><td th:text="${#strings.isEmpty(row.activity.archiveOperatorName) ? '未记录' : row.activity.archiveOperatorName}"></td><td class="muted-text" th:text="${#temporals.format(row.activity.archiveTime,'yyyy-MM-dd HH:mm')}"></td><td><a class="row-link" th:href="@{/activity/detail/{id}(id=${row.activity.id})}">详情 <svg th:replace="~{fragments/layout :: icon('chevron')}"></svg></a></td></tr><tr th:if="${#lists.isEmpty(rows)}"><td colspan="9" class="empty-cell">暂无归档记录。获批活动执行完毕后，可在详情页归档。</td></tr></tbody></table></div></section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

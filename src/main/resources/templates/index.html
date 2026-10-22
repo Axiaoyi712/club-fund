@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('工作台')}"></head>
+<body class="cf-app" data-page="index">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('index')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('工作台')}"></header>
+<main id="main" tabindex="-1">
+<div class="page-heading"><div><h1 th:text="${user.role == 'admin' ? '管理总览' : user.role == 'applicant' ? '我的工作台' : '审批工作台'}"></h1><p th:text="${user.role == 'admin' ? '全系统活动申请、审批与经费执行概览' : user.role == 'applicant' ? (canSubmitActivity ? '提交申请、跟踪审批进度与经费执行' : '查看申请记录、审批进度与经费执行') : '查看当前待办，核对活动安排与经费预算'}"></p></div><a class="button primary" th:href="@{${user.role == 'applicant' ? (canSubmitActivity ? '/activity/add' : '/activity/list') : user.role == 'admin' ? '/activity/list' : '/approve/list'}}"><span th:text="${user.role == 'applicant' ? (canSubmitActivity ? '＋ 新增申请' : '查看我的申请') : user.role == 'admin' ? '查看活动申请' : '处理审批待办'}"></span><svg th:replace="~{fragments/layout :: icon('arrow')}"></svg></a></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+<section class="metrics" th:if="${user.role == 'admin'}" aria-label="全局经费统计">
+    <article th:replace="~{fragments/layout :: metric('申请总金额', ${totalApply}, '全部活动累计申请金额', 'coins', true)}"></article>
+    <article th:replace="~{fragments/layout :: metric('实际支出总额', ${totalExpense}, '已登记的实际经费支出', 'chart', true)}"></article>
+    <article th:replace="~{fragments/layout :: metric('活动申请总数', ${totalCount}, ${adminTrend.text}, 'file', false)}"></article>
+    <article th:replace="~{fragments/layout :: metric('已获批活动', ${approvedCount}, '已完成全部三级审批', 'check', false)}"></article>
+</section>
+<section class="metrics" th:if="${user.role == 'applicant'}" aria-label="我的申请统计">
+    <article th:replace="~{fragments/layout :: metric('累计申请金额', ${myAmount}, '我的全部活动申请金额', 'coins', true)}"></article>
+    <article th:replace="~{fragments/layout :: metric('我的申请总数', ${myTotal}, ${myTrend.text}, 'file', false)}"></article>
+    <article th:replace="~{fragments/layout :: metric('待审批申请', ${myPending}, '已提交，等待主席团审批', 'clock', false)}"></article>
+    <article th:replace="~{fragments/layout :: metric('已获批活动', ${myApproved}, '已完成全部三级审批', 'check', false)}"></article>
+</section>
+<section class="metrics three" th:if="${user.role != 'admin' and user.role != 'applicant'}" aria-label="审批待办统计">
+    <article th:replace="~{fragments/layout :: metric('待我审批', ${pendingCount}, '当前需要你处理的申请', 'check', false)}"></article>
+    <article th:replace="~{fragments/layout :: metric('未读消息', ${unreadCount}, '流程待办与审批结果提醒', 'bell', false)}"></article>
+    <article th:replace="~{fragments/layout :: metric('工作状态', ${pendingCount > 0 ? '有任务' : '暂无待办'}, '按流程逐级审批并记录意见', 'clock', false)}"></article>
+</section>
+<p class="form-text" th:if="${user.role == 'admin' or user.role == 'applicant'}">月度新增与环比按首次提交月份统计，重新提交不重复计数。<span th:if="${unknownFirstApplyCount > 0}" th:text="|另有 ${unknownFirstApplyCount} 条旧申请未记录首次时间，仅计入累计总数。|"></span></p>
+<div class="dashboard-grid">
+    <div class="main-column">
+        <th:block th:if="${user.role == 'admin'}">
+            <section class="warning-panel" th:if="${overCount > 0}" aria-label="超支预警"><span class="warning-icon"><svg th:replace="~{fragments/layout :: icon('warn')}"></svg></span><div><h2 th:text="|有 ${overCount} 项活动出现超支|"></h2><p>实际支出已超过申请金额，请关注经费执行情况。</p></div><a class="text-button" th:href="@{/report}">查看报表 <svg th:replace="~{fragments/layout :: icon('arrow')}"></svg></a></section>
+            <section th:replace="~{fragments/charts :: clubs}"></section>
+            <section th:replace="~{fragments/charts :: grades}"></section>
+        </th:block>
+        <section class="panel" th:if="${user.role == 'applicant'}"><div class="list-toolbar"><h2>最近的申请</h2><a class="text-button" th:href="@{/activity/list}">查看全部 <svg th:replace="~{fragments/layout :: icon('arrow')}"></svg></a></div><div class="table-responsive" tabindex="0" role="region" aria-label="最近申请"><table class="table mb-0 align-middle"><thead><tr><th scope="col">活动内容</th><th scope="col" class="text-end">申请金额</th><th scope="col">审批状态</th><th scope="col">操作</th></tr></thead><tbody><tr th:each="a : ${recentActivities}"><td th:text="${a.title}"></td><td class="text-end amount" th:text="${'¥' + #numbers.formatDecimal(a.totalApply, 1, 'COMMA', 2, 'POINT')}"></td><td><span th:replace="~{fragments/layout :: status(${a.status})}"></span></td><td><a class="row-link" th:href="@{/activity/detail/{id}(id=${a.id})}">详情</a></td></tr><tr th:if="${#lists.isEmpty(recentActivities)}"><td colspan="4" class="empty-cell" th:text="${canSubmitActivity ? '还没有申请记录，点击“新增申请”开始。' : '暂无申请记录。仅社团负责人可提交申请。'}"></td></tr></tbody></table></div></section>
+        <section class="panel" th:if="${user.role != 'applicant' and user.role != 'admin'}"><div class="list-toolbar"><h2>最近待办申请</h2><a class="text-button" th:href="@{/approve/list}">查看全部 <svg th:replace="~{fragments/layout :: icon('arrow')}"></svg></a></div><div class="table-responsive" tabindex="0" role="region" aria-label="最近审批待办"><table class="table mb-0 align-middle"><thead><tr><th scope="col">活动内容</th><th scope="col">主办社团</th><th scope="col" class="text-end">申请金额</th><th scope="col">操作</th></tr></thead><tbody><tr th:each="a : ${pendingRecent}"><td th:text="${a.title}"></td><td th:text="${clubNames[a.clubId]} ?: '—'"></td><td class="text-end amount" th:text="${'¥' + #numbers.formatDecimal(a.totalApply, 1, 'COMMA', 2, 'POINT')}"></td><td><a class="row-link" th:href="@{/activity/detail/{id}(id=${a.id})}">审批</a></td></tr><tr th:if="${#lists.isEmpty(pendingRecent)}"><td colspan="4" class="empty-cell">暂无待你审批的申请。</td></tr></tbody></table></div></section>
+    </div>
+    <div class="right-column">
+        <section th:if="${user.role == 'admin'}" th:insert="~{fragments/charts :: status}" class="chart-wrapper"></section>
+        <section class="panel shortcuts"><div class="panel-heading compact"><h2>快捷入口</h2></div><div class="shortcut-grid"><a th:href="@{/activity/list}"><span><svg th:replace="~{fragments/layout :: icon('file')}"></svg></span>活动申请</a><a th:href="@{/club/list}"><span><svg th:replace="~{fragments/layout :: icon('users')}"></svg></span>社团管理</a><a th:if="${user.role == 'admin'}" th:href="@{/report}"><span><svg th:replace="~{fragments/layout :: icon('chart')}"></svg></span>统计报表</a><a th:if="${user.role == 'teacher' or user.role == 'leader' or user.role == 'admin'}" th:href="@{/archive/list}"><span><svg th:replace="~{fragments/layout :: icon('archive')}"></svg></span>经费台账</a><a th:if="${user.role == 'applicant' or user.role == 'chairman'}" th:href="@{/notification/list}"><span><svg th:replace="~{fragments/layout :: icon('bell')}"></svg></span>消息通知</a></div></section>
+        <section class="panel notices"><div class="panel-heading compact"><h2>消息通知</h2><a class="text-button" th:href="@{/notification/list}" th:text="${unreadCount > 0 ? unreadCount + ' 条未读' : '查看全部'}"></a></div><ul class="recent-notifications" th:if="${!#lists.isEmpty(recentNotifications)}"><li th:each="n : ${recentNotifications}"><span class="tiny-dot" th:classappend="${n.isRead == 0 ? 'green-dot' : 'read-dot'}"></span><div><a th:href="${n.relatedId != null} ? @{/activity/detail/{id}(id=${n.relatedId})} : @{/notification/list}" th:text="${n.content}"></a><span th:if="${n.type == 'todo'}" class="badge rounded-pill" th:classappend="${n.isProcessed == 1 ? 'bg-dark' : 'bg-primary'}" th:text="${n.isProcessed == 1 ? '已处理' : '待处理'}"></span><time th:text="${#temporals.format(n.createTime, 'MM-dd HH:mm')}"></time></div></li></ul><div class="empty-state" th:if="${#lists.isEmpty(recentNotifications)}"><span class="empty-icon"><svg th:replace="~{fragments/layout :: icon('bell')}"></svg></span><p>暂无消息通知</p><span>新的流程提醒会显示在这里</span></div></section>
+    </div>
+</div>
+<th:block th:if="${user.role == 'admin'}"><script th:inline="javascript">window.cfDashboard = {clubAmount: /*[[${clubAmount}]]*/ {}, statusCount: /*[[${statusCount}]]*/ {}, totalCount: /*[[${totalCount}]]*/ 0};</script><script th:src="@{/js/charts.js(v='f1f0cee8125f')}" defer></script></th:block>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('社团成员')}"></head>
+<body class="cf-app" data-page="club_member">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('club')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('社团成员')}"></header>
+<main id="main" tabindex="-1">
+<div class="container-fluid px-0 mx-auto" style="max-width:720px;">
+    <div class="d-flex justify-content-between align-items-center mb-3 page-toolbar">
+        <div class="page-header">
+            <h4 class="mb-0" th:text="|『${club.name}』成员名单（${#lists.size(members)}人）|"></h4>
+            <p class="page-sub">查看和编辑社团成员名单</p>
+        </div>
+    </div>
+
+    <div class="alert alert-danger py-2" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-success py-2" th:if="${success}" th:text="${success}"></div>
+
+    <!-- 添加成员 -->
+    <form th:action="@{/club/members/add}" method="post" class="card card-body bg-light mb-3">
+        <input type="hidden" name="clubId" th:value="${club.id}">
+        <div class="row g-2">
+            <div class="col-md-8">
+                <input type="text" id="member-name" name="memberName" th:value="${memberName}" aria-label="成员姓名" class="form-control form-control-sm" placeholder="输入成员姓名，最多50字" aria-describedby="member-name-help member-name-count member-name-error" required>
+                <div class="form-text d-flex justify-content-between flex-wrap gap-2"><span id="member-name-help">最多50字。</span><span id="member-name-count" class="text-nowrap">0/50字</span></div>
+                <p class="field-error" id="member-name-error" aria-live="polite" hidden></p>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary btn-sm w-100">添加成员</button>
+            </div>
+        </div>
+        <div class="form-text mt-1">成员名单用于活动组织与经费使用情况跟踪</div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="数据表格，可横向滚动"><table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col" style="width:8%">序号</th>
+                    <th scope="col">成员姓名</th>
+                    <th scope="col" style="width:25%">加入时间</th>
+                    <th scope="col" style="width:15%">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m, st : ${members}">
+                    <td th:text="${st.count}"></td>
+                    <td th:text="${m.memberName}"></td>
+                    <td class="small" th:text="${#temporals.format(m.joinTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <form th:action="@{/club/members/remove/{id}(id=${m.id})}" method="post" class="mb-0">
+                            <input type="hidden" name="clubId" th:value="${club.id}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm"
+                                    onclick="return confirm('确认移除该成员？')">移除</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(members)}">
+                    <td colspan="4" class="text-center text-muted py-4">暂无成员，先添加几位吧</td>
+                </tr>
+                </tbody>
+            </table></div>
+        </div>
+    </div>
+
+    </div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+<script th:src="@{/js/club-member.js(v='be668c3957e7')}" defer></script>
+
+</body>
+</html>

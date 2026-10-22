@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('统计报表')}"></head>
+<body class="cf-app" data-page="report">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('report')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('统计报表')}"></header>
+<main id="main" tabindex="-1">
+<div class="page-heading"><div><h1>经费统计报表</h1><p>查看全系统经费申请、审批状态与社团金额分布。</p></div><a class="button secondary" th:href="@{/export/activities}"><svg th:replace="~{fragments/layout :: icon('file')}"></svg>导出申请列表</a></div>
+<section class="metrics" aria-label="全局经费统计"><article th:replace="~{fragments/layout :: metric('申请总金额', ${totalApply}, '全部活动累计申请金额', 'coins', true)}"></article><article th:replace="~{fragments/layout :: metric('实际支出总额', ${totalExpense}, '已登记的实际经费支出', 'chart', true)}"></article><article th:replace="~{fragments/layout :: metric('活动申请总数', ${totalCount}, '全部经费申请记录', 'file', false)}"></article><article th:replace="~{fragments/layout :: metric('已获批活动', ${approvedCount}, '已完成全部三级审批', 'check', false)}"></article></section>
+<section class="warning-panel mb-3" th:if="${overCount > 0}"><span class="warning-icon"><svg th:replace="~{fragments/layout :: icon('warn')}"></svg></span><div><h2 th:text="|有 ${overCount} 项活动出现超支|"></h2><p>实际支出超过申请金额，请结合活动详情核对经费执行。</p></div><a class="text-button" th:href="@{/activity/list}">查看活动申请</a></section>
+<p class="report-note" th:if="${overCount == 0}"><span class="tiny-dot green-dot"></span>当前未发现实际支出超过申请金额的活动。</p>
+<div class="dashboard-grid"><div class="main-column"><section th:replace="~{fragments/charts :: clubs}"></section><section th:replace="~{fragments/charts :: grades}"></section></div><div class="right-column"><section th:replace="~{fragments/charts :: status}"></section><section class="panel"><div class="panel-heading"><h2>统计口径</h2></div><div class="stat-explanation"><p>申请金额按全部活动的申请金额汇总，包括审批中、获批和驳回的记录。</p><p>实际支出按已登记的支出汇总。某项活动的支出超过申请金额时计入超支预警。</p><a class="text-button" th:href="@{/archive/list}">查看已归档经费台账 <svg th:replace="~{fragments/layout :: icon('arrow')}"></svg></a></div></section></div></div>
+<script th:inline="javascript">window.cfDashboard = /*[[${statsJson}]]*/ "{}";</script><script th:src="@{/js/charts.js(v='f1f0cee8125f')}" defer></script>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('请刷新后重试')}"></head>
+<body class="cf-app">
+<main class="container py-5" id="main">
+    <section class="panel p-4 mx-auto" style="max-width:640px" aria-labelledby="error-title">
+        <p class="auth-kicker">请求未提交</p>
+        <h1 class="mb-3" id="error-title">请刷新页面后重试</h1>
+        <p class="mb-2">页面信息已过期，或本次操作未通过安全校验。</p>
+        <p class="mb-4">本次操作未执行。请返回原页面，刷新后重新提交。</p>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="button primary" onclick="history.back()">返回上一页</button>
+            <a class="button secondary" th:href="@{/index}">返回工作台</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

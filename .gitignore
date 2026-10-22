@@ -1,0 +1,34 @@
+# ===== Maven 构建产物 =====
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# ===== IntelliJ IDEA =====
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ===== Eclipse / VS Code（以防换过编辑器）=====
+.vscode/
+.classpath
+.project
+.settings/
+
+# ===== 日志文件 =====
+*.log
+logs/
+
+# ===== 操作系统生成的临时文件 =====
+.DS_Store
+Thumbs.db
+
+# ===== 本地敏感配置（如以后单独放密码）=====
+application-local.yml
+application-local.properties

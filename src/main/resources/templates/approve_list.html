@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('经费审批')}"></head>
+<body class="cf-app" data-page="approve_list">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('approve')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('经费审批')}"></header>
+<main id="main" tabindex="-1">
+<div class="container-fluid px-0">
+    <div class="page-header mb-3">
+        <h4 class="mb-0">待我审批的申请表</h4>
+        <p class="page-sub">三级审批流程：主席团 → 团委老师 → 学院领导</p>
+    </div>
+
+    <div class="alert alert-success py-2" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger py-2" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="数据表格，可横向滚动"><table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">活动内容</th>
+                    <th scope="col">主办社团</th>
+                    <th scope="col">申请人</th>
+                    <th scope="col">活动时间</th>
+                    <th scope="col">申请金额</th>
+                    <th scope="col">当前状态</th>
+                    <th scope="col">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${page.records}">
+                    <td th:text="${a.title}"></td>
+                    <td th:text="${clubNames[a.clubId]} != null ? ${clubNames[a.clubId]} : '—'"></td>
+                    <td><span th:text="${userNames[a.applyUser]} != null ? ${userNames[a.applyUser]} : '—'"></span><span class="badge bg-warning text-dark ms-1" th:if="${a.applyUser == user.id and user.role != 'admin'}" title="当前审批人与申请人为同一账号">本人审批</span></td>
+                    <td class="small" th:text="${#temporals.format(a.startTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${'¥' + #numbers.formatDecimal(a.totalApply,1,'COMMA',2,'POINT')}"></td>
+                    <td>
+                        <span th:switch="${a.status}">
+                            <span class="badge bg-secondary" th:case="'submitted'">待主席团审批</span>
+                            <span class="badge bg-info text-dark" th:case="'chairman_passed'">待团委老师审批</span>
+                            <span class="badge bg-info text-dark" th:case="'teacher_passed'">待学院领导审批</span>
+                        </span>
+                    </td>
+                    <td>
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{/activity/detail/{id}(id=${a.id})}">审批</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(page.records)}">
+                    <td colspan="7" class="text-center text-muted py-4">没有待你审批的申请</td>
+                </tr>
+                </tbody>
+            </table></div>
+        </div>
+    </div>
+
+    <!-- 分页条 -->
+    <nav th:if="${page.pages > 1}" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${page.current <= 1} ? 'disabled'">
+                <a class="page-link" th:href="@{/approve/list(page=${page.current - 1})}">上一页</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(1, page.pages)}"
+                th:classappend="${i == page.current} ? 'active'">
+                <a class="page-link" th:href="@{/approve/list(page=${i})}" th:text="${i}"></a>
+            </li>
+            <li class="page-item" th:classappend="${page.current >= page.pages} ? 'disabled'">
+                <a class="page-link" th:href="@{/approve/list(page=${page.current + 1})}">下一页</a>
+            </li>
+        </ul>
+    </nav>
+    <p class="text-center text-muted small" th:if="${page.pages > 1}" th:text="|共 ${page.total} 条记录|"></p>
+
+    </div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

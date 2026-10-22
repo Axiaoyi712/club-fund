@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('活动申请')}"></head>
+<body class="cf-app" data-page="activity_list">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('activity')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('活动申请')}"></header>
+<main id="main" tabindex="-1">
+<div class="page-heading"><div><h1 th:text="${roleName == 'applicant' ? '我的活动申请' : '活动申请'}"></h1><p>查看活动预算、申请金额与当前审批进度</p></div><div class="heading-actions"><a class="button secondary" th:href="@{/export/activities}"><svg th:replace="~{fragments/layout :: icon('file')}"></svg><span th:text="${roleName == 'applicant' ? '导出我的申请' : '导出 Excel'}">导出 Excel</span></a><a class="button primary" th:if="${canSubmitActivity}" th:href="@{/activity/add}">＋ 新增申请</a></div></div>
+<div th:replace="~{fragments/layout :: alerts}"></div>
+<div class="alert alert-info" role="status" th:if="${!canSubmitActivity}">仅社团负责人可提交申请，当前账号没有负责的社团。</div>
+<section class="panel application-panel"><div class="list-toolbar"><div class="section-caption"><h2 th:text="${roleName == 'applicant' ? '我的申请记录' : '全部活动申请'}"></h2><span class="count-badge" th:text="${page.total}"></span></div><div class="view-switch" aria-label="展示方式"><a class="selected" aria-current="page" th:href="@{/activity/list}"><svg th:replace="~{fragments/layout :: icon('file')}"></svg>列表</a><a th:href="@{/activity/board}"><svg th:replace="~{fragments/layout :: icon('grid')}"></svg>看板</a></div></div><p class="scroll-hint"><svg th:replace="~{fragments/layout :: icon('arrow')}"></svg>左右滑动表格，查看完整信息</p><div class="table-responsive" tabindex="0" role="region" aria-label="活动申请表格，可横向滚动"><table class="data-table application-table"><caption class="sr-only">活动经费申请记录</caption><colgroup><col style="width:22%"><col style="width:13%"><col style="width:12%"><col style="width:11%"><col style="width:11%"><col style="width:7%"><col style="width:15%"><col style="width:9%"></colgroup><thead><tr><th scope="col">活动内容</th><th scope="col">主办社团</th><th scope="col">活动时间</th><th scope="col" class="number">预算合计</th><th scope="col" class="number">申请金额</th><th scope="col">级别</th><th scope="col">审批状态</th><th scope="col">操作</th></tr></thead><tbody><tr th:each="a : ${page.records}"><td><a class="activity-name" th:href="@{/activity/detail/{id}(id=${a.id})}" th:text="${a.title}"></a><span class="cell-sub" th:text="|#CF-${a.id}|"></span></td><td th:text="${clubNames[a.clubId]} ?: '—'"></td><td><span class="date-text" th:text="${#temporals.format(a.startTime, 'yyyy-MM-dd')}"></span><span class="cell-sub" th:text="${#temporals.format(a.startTime, 'HH:mm')}"></span></td><td class="number" th:text="${'¥' + #numbers.formatDecimal(a.totalBudget, 1, 'COMMA', 2, 'POINT')}"></td><td class="number apply-amount" th:text="${'¥' + #numbers.formatDecimal(a.totalApply, 1, 'COMMA', 2, 'POINT')}"></td><td><span th:replace="~{fragments/layout :: grade(${a.totalApply})}"></span></td><td><span th:replace="~{fragments/layout :: status(${a.status})}"></span><span class="archive-pill" th:if="${a.archived == 1}">已归档</span></td><td><a class="row-link" th:href="@{/activity/detail/{id}(id=${a.id})}">详情 <svg th:replace="~{fragments/layout :: icon('chevron')}"></svg></a></td></tr><tr th:if="${#lists.isEmpty(page.records)}"><td colspan="8" class="empty-cell" th:text="${canSubmitActivity ? '还没有申请记录，点击“新增申请”开始。' : '暂无申请记录。仅社团负责人可提交申请。'}"></td></tr></tbody></table></div><div class="list-footer"><span th:text="|共 ${page.total} 条记录|"></span><nav th:if="${page.pages > 1}" aria-label="申请列表分页"><ul class="pagination mb-0"><li class="page-item" th:classappend="${page.current <= 1} ? 'disabled'"><a class="page-link" th:href="@{/activity/list(page=${page.current - 1})}" th:attr="tabindex=${page.current <= 1 ? -1 : null}">上一页</a></li><li class="page-item" th:each="i : ${#numbers.sequence(1, page.pages)}" th:classappend="${i == page.current} ? 'active'"><a class="page-link" th:href="@{/activity/list(page=${i})}" th:attr="aria-current=${i == page.current ? 'page' : null}" th:text="${i}"></a></li><li class="page-item" th:classappend="${page.current >= page.pages} ? 'disabled'"><a class="page-link" th:href="@{/activity/list(page=${page.current + 1})}" th:attr="tabindex=${page.current >= page.pages ? -1 : null}">下一页</a></li></ul></nav></div></section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

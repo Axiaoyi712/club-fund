@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('社团管理')}"></head>
+<body class="cf-app" data-page="club_list">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('club')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('社团管理')}"></header>
+<main id="main" tabindex="-1">
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-3 page-toolbar">
+        <div class="page-header">
+            <h4 class="mb-0">社团管理</h4>
+            <p class="page-sub">维护社团（主办单位）信息，管理成员名单</p>
+        </div>
+        <a class="btn btn-primary btn-sm" th:href="@{/club/add}">+ 新增社团</a>
+    </div>
+
+    <!-- 操作提示（成功/错误） -->
+    <div class="alert alert-success py-2" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger py-2" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive" tabindex="0" role="region" aria-label="数据表格，可横向滚动"><table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col" style="width:8%">ID</th>
+                    <th scope="col">社团名称</th>
+                    <th scope="col">简介</th>
+                    <th scope="col" style="width:15%">负责人</th>
+                    <th scope="col" style="width:18%">创建时间</th>
+                    <th scope="col" style="width:20%">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="club : ${clubs}">
+                    <td th:text="${club.id}"></td>
+                    <td th:text="${club.name}"></td>
+                    <td class="text-muted small" th:text="${club.description}"></td>
+                    <td th:text="${leaderNames[club.leaderId]} != null ? ${leaderNames[club.leaderId]} : '—'"></td>
+                    <td class="small" th:text="${#temporals.format(club.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <span th:if="${user.role == 'admin' or user.role == 'teacher' or user.role == 'leader' or club.leaderId == user.id}">
+                            <a class="btn btn-outline-primary btn-sm" th:href="@{/club/members/{id}(id=${club.id})}">成员</a>
+                            <a class="btn btn-outline-secondary btn-sm" th:href="@{/club/edit/{id}(id=${club.id})}">编辑</a>
+                            <form class="d-inline" th:action="@{/club/delete/{id}(id=${club.id})}" method="post"
+                                  onsubmit="return confirm('确定删除这个社团及其全部成员记录吗？')">
+                                <button class="btn btn-outline-danger btn-sm" type="submit">删除</button>
+                            </form>
+                        </span>
+                        <span class="text-muted small" th:unless="${user.role == 'admin' or user.role == 'teacher' or user.role == 'leader' or club.leaderId == user.id}">—</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(clubs)}">
+                    <td colspan="6" class="text-center text-muted py-4">还没有社团，点击右上角"新增社团"创建第一个</td>
+                </tr>
+                </tbody>
+            </table></div>
+        </div>
+    </div>
+
+    </div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

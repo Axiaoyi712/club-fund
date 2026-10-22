@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${error})}"></head>
+<body class="cf-app">
+<main class="container py-5" id="main">
+    <section class="panel p-4 mx-auto" style="max-width:640px" aria-labelledby="error-title">
+        <p class="auth-kicker" th:text="${'请求未完成 · ' + status}">请求未完成</p>
+        <h1 class="mb-3" id="error-title" th:text="${error}">请求未能完成</h1>
+        <p class="mb-4" th:text="${message}">请返回页面检查后重试。</p>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="button primary" onclick="history.back()">返回上一页</button>
+            <a class="button secondary" th:href="${user != null} ? @{/index} : @{/login}"
+               th:text="${user != null} ? '返回工作台' : '返回登录'">返回工作台</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

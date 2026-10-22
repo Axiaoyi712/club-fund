@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('消息通知')}"></head>
+<body class="cf-app" data-page="notification_list">
+<svg th:replace="~{fragments/layout :: icons}"></svg>
+<a class="skip" href="#main">跳到主要内容</a>
+<button class="scrim" type="button" aria-label="关闭导航" tabindex="-1" hidden></button>
+<aside th:replace="~{fragments/layout :: sidebar('notification')}"></aside>
+<div class="page">
+<header th:replace="~{fragments/layout :: topbar('消息通知')}"></header>
+<main id="main" tabindex="-1">
+<div class="container-fluid px-0 mx-auto" >
+    <div class="d-flex justify-content-between align-items-center mb-3 page-toolbar">
+        <div class="page-header">
+            <h4 class="mb-0">消息通知</h4>
+            <p class="page-sub">处理状态与已读状态独立；同级任一审批人完成后，该级待办统一结束。</p>
+            <p class="small mb-0" th:text="|待处理 ${pendingTodoCount} 条|" aria-live="polite"></p>
+        </div>
+        <form th:action="@{/notification/readAll}" method="post" class="mb-0">
+            <button type="submit" class="btn btn-outline-primary btn-sm">全部标记已读</button>
+        </form>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-start py-3"
+                    th:each="n : ${notifications}"
+                    th:attr="data-notification-id=${n.id}"
+                    th:classappend="${n.isRead == 0} ? 'bg-light'">
+                    <div class="d-flex align-items-start gap-2">
+                        <span class="badge rounded-pill mt-1"
+                              th:classappend="${n.type == 'todo' ? (n.isProcessed == 1 ? 'bg-dark' : 'bg-primary') : 'bg-info text-dark'}"
+                              th:text="${n.type == 'todo' ? (n.isProcessed == 1 ? '已处理' : '待处理') : '结果'}"></span>
+                        <div>
+                            <div class="small" th:text="${n.content}"></div>
+                            <span class="text-muted small" th:text="${n.isRead == 0 ? '未读' : '已读'}"></span>
+                            <div class="text-muted" style="font-size:12px;"
+                                 th:text="${#temporals.format(n.createTime, 'yyyy-MM-dd HH:mm')}"></div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a th:if="${n.relatedId != null}" class="btn btn-outline-primary btn-sm"
+                           th:href="@{/activity/detail/{id}(id=${n.relatedId})}">查看</a>
+                        <form th:if="${n.isRead == 0}" th:action="@{/notification/read/{id}(id=${n.id})}" method="post" class="mb-0">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">标记已读</button>
+                        </form>
+                    </div>
+                </li>
+                <li class="list-group-item text-center text-muted py-4" th:if="${#lists.isEmpty(notifications)}">
+                    暂无通知
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    </div>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</main>
+</div>
+<script th:src="@{/js/ui.js(v='b8c51d2db8f5')}" defer></script>
+
+</body>
+</html>

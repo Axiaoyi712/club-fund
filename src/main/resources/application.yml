@@ -1,0 +1,25 @@
+# 项目配置文件：数据库连接、端口等都在这里改
+
+server:
+  port: 8080          # 项目运行的端口，浏览器访问 http://localhost:8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/club_fund?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456   # 你的 MySQL root 密码
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # 启动时自动执行 schema.sql 建表（表已存在则跳过，不会重复建）
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+  thymeleaf:
+    cache: false        # 开发阶段关闭模板缓存，改页面不用重启
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true   # 数据库 user_name 自动对应 Java 的 userName
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 控制台打印 SQL，方便看
